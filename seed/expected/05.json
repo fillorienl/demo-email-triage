@@ -1,0 +1,28 @@
+{
+  "read": {
+    "sub_reason": "wrong item delivered for the second time",
+    "secondary_intents": [],
+    "order_refs": [
+      "TH-26-118"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "M12x80 A4 RVS"
+    ],
+    "sentiment": "angry",
+    "urgency": "high",
+    "threatens_to_leave_or_legal": true,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "complaint",
+    "language": "nl",
+    "summary": "Second wrong delivery (A2 instead of A4); threatens to switch supplier, wants a call today."
+  },
+  "expected": {
+    "lane": "escalated",
+    "ruleId": "escalate_complaint"
+  },
+  "draft": "Beste Erik,\n\nExcuses: dit had niet mogen gebeuren, en zeker niet voor de tweede keer. We nemen uw melding over order {{customer_order_reference}} serieus.\n\nEen collega van onze serviceafdeling neemt persoonlijk contact met u op.\n\nMet vriendelijke groet,\n{{signature}}"
+}

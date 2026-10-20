@@ -1,0 +1,28 @@
+{
+  "read": {
+    "sub_reason": "job cancelled, wants to return hose",
+    "secondary_intents": [],
+    "order_refs": [
+      "AHN-0937"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "hydraulische slang R2 3/8"
+    ],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "return_request",
+    "language": "nl",
+    "summary": "Wants to return 25 m hydraulic hose because the job was cancelled."
+  },
+  "expected": {
+    "lane": "escalated",
+    "ruleId": "escalate_return_refused"
+  },
+  "draft": "Beste Henk,\n\nDank voor uw bericht. Helaas kunnen we de hydraulische slang niet retour nemen. Slang wordt voor u op maat geknipt en valt daarom buiten onze retourregeling: retouren zijn mogelijk binnen 30 dagen na levering, ongeopend, met uitzondering van op maat gemaakte artikelen.\n\nHet gaat om: {{return_items}}.\n\nHeeft u nog vragen, laat het ons gerust weten.\n\nMet vriendelijke groet,\n{{signature}}"
+}

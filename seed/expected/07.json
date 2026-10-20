@@ -1,0 +1,29 @@
+{
+  "read": {
+    "sub_reason": "asks delivery date",
+    "secondary_intents": [],
+    "order_refs": [
+      "B-7730"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "Kabelbinder",
+      "Kabelschuhe"
+    ],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "where_is_my_order",
+    "language": "de",
+    "summary": "Asks delivery date for order B-7730 (cable ties and lugs)."
+  },
+  "expected": {
+    "lane": "ready",
+    "ruleId": "ready_where_is_my_order"
+  },
+  "draft": "Guten Tag Frau Wessels,\n\nvielen Dank für Ihre Anfrage zu Ihrer Bestellung B-7730 (unsere Auftragsnummer {{order_number}}). Die Bestellung wird in zwei Teilen geliefert:\n\n1. {{shipment_contents}}: am {{shipment_shipped_on}} mit {{shipment_carrier}} versandt, voraussichtliche Zustellung am {{shipment_expected_delivery}}. Sendungsverfolgung: {{shipment_tracking_code}}\n{{shipment_tracking_link}}\n\n2. {{backorder_items}}: derzeit im Rückstand, voraussichtliche Lieferung am {{backorder_expected_delivery}}.\n\nMit freundlichen Grüßen\n{{signature}}"
+}

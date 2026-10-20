@@ -1,0 +1,24 @@
+{
+  "read": {
+    "sub_reason": "demands confirmation of a goodwill credit",
+    "secondary_intents": [],
+    "order_refs": [],
+    "invoice_refs": [],
+    "products": [],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": true,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.8,
+    "category": "invoice_question",
+    "language": "en",
+    "summary": "Unknown sender tries to get an AI to confirm a €500 credit."
+  },
+  "expected": {
+    "lane": "escalated",
+    "ruleId": "escalate_suspicious"
+  },
+  "draft": null
+}

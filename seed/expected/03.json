@@ -1,0 +1,28 @@
+{
+  "read": {
+    "sub_reason": "wrong size, wants exchange for size 9",
+    "secondary_intents": [],
+    "order_refs": [
+      "DFP-55821"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "nitrile gloves size 10"
+    ],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unopened",
+    "confidence": 0.95,
+    "category": "return_request",
+    "language": "en",
+    "summary": "Wants to return 50 pairs of size 10 nitrile gloves (unopened) for size 9."
+  },
+  "expected": {
+    "lane": "ready",
+    "ruleId": "ready_return"
+  },
+  "draft": "Hi James,\n\nThanks for letting us know. You can return the gloves: {{return_items}}. Your return number is {{rma_number}}.\n\n{{return_instructions}} Please send them back before {{return_before}}.\n\nThe size 9 gloves are not arranged automatically: a colleague from sales will confirm the replacement order with you separately.\n\nKind regards,\n{{signature}}"
+}

@@ -1,0 +1,26 @@
+{
+  "read": {
+    "sub_reason": "late delivery, no order number given",
+    "secondary_intents": [],
+    "order_refs": [],
+    "invoice_refs": [],
+    "products": [
+      "bouten"
+    ],
+    "sentiment": "negative",
+    "urgency": "high",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "where_is_my_order",
+    "language": "nl",
+    "summary": "Bolts not delivered yet, promised last week; technicians waiting."
+  },
+  "expected": {
+    "lane": "needs_look",
+    "ruleId": "look_late"
+  },
+  "draft": "Beste Sandra,\n\nExcuses dat uw bestelling nog niet binnen is. Uw order {{customer_order_reference}} (ons ordernummer {{order_number}}) had eerder geleverd moeten worden, maar de artikelen staan helaas in backorder: {{backorder_items}}.\n\nDe nieuwe verwachte leverdatum is {{backorder_expected_delivery}}. Zodra de order de deur uit gaat, ontvangt u de trackinggegevens.\n\nNogmaals excuses voor het ongemak.\n\nMet vriendelijke groet,\n{{signature}}"
+}

@@ -1,0 +1,26 @@
+{
+  "read": {
+    "sub_reason": "invoice received twice with different amounts",
+    "secondary_intents": [],
+    "order_refs": [],
+    "invoice_refs": [
+      "26-30412"
+    ],
+    "products": [],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "invoice_question",
+    "language": "nl",
+    "summary": "Invoice 26-30412 received twice with different amounts; wants a corrected invoice."
+  },
+  "expected": {
+    "lane": "escalated",
+    "ruleId": "escalate_invoice"
+  },
+  "draft": null
+}

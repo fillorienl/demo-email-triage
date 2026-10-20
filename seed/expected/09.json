@@ -1,0 +1,30 @@
+{
+  "read": {
+    "sub_reason": "increase quantity of M8 nuts from 20 to 30 boxes",
+    "secondary_intents": [
+      "where_is_my_order"
+    ],
+    "order_refs": [
+      "KL-2026-311"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "M8 moeren"
+    ],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "order_change",
+    "language": "nl",
+    "summary": "Change M8 nuts from 20 to 30 boxes on KL-2026-311 and asks delivery date."
+  },
+  "expected": {
+    "lane": "needs_look",
+    "ruleId": "look_order_change"
+  },
+  "draft": "Beste Sandra,\n\nDank voor uw bericht. Wijzigingen in een order voeren we niet automatisch door: onze verkoopbinnendienst bekijkt uw verzoek om het aantal M8 moeren aan te passen en bevestigt dit apart.\n\nOver de levering: de artikelen van order {{customer_order_reference}} staan in backorder ({{backorder_items}}). De verwachte leverdatum is nu {{backorder_expected_delivery}}. Excuses dat dit later is dan eerder toegezegd.\n\nMet vriendelijke groet,\n{{signature}}"
+}

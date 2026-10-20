@@ -1,0 +1,140 @@
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "tailwindcss";
+
+/*
+ * Design tokens, shared with the invoice intake demo.
+ * ink      sidebar, headings, primary text
+ * carbon   the one accent: actions and the AI step
+ * paper    page background; surfaces are white
+ * status   ready / review / blocked / manual: here ready / needs a look / escalated / archived
+ */
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  --color-ink: #16213a;
+  --color-ink-2: #2a3654;
+  --color-muted: #5e6878;
+  --color-faint: #8a93a3;
+  --color-line: #e2e5ea;
+  --color-paper: #f5f6f8;
+  --color-carbon: #3a4bc9;
+  --color-carbon-dark: #2c3aa6;
+  --color-carbon-soft: #eceefc;
+
+  --color-ready: #0e7a55;
+  --color-ready-soft: #e6f4ee;
+  --color-review: #a86200;
+  --color-review-soft: #fdf3e2;
+  --color-blocked: #c2332c;
+  --color-blocked-soft: #fcebea;
+  --color-manual: #5a6472;
+  --color-manual-soft: #eef0f3;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-carbon);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@utility panel {
+  @apply rounded-[10px] border border-line bg-white;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-45;
+}
+@utility btn-primary {
+  @apply btn bg-carbon text-white hover:bg-carbon-dark;
+}
+@utility btn-secondary {
+  @apply btn border border-line bg-white text-ink hover:border-faint;
+}
+@utility btn-danger {
+  @apply btn border border-line bg-white text-blocked hover:border-blocked;
+}
+@utility btn-ghost {
+  @apply btn px-2.5 text-muted hover:bg-paper hover:text-ink;
+}
+
+@utility label {
+  @apply text-[13px] text-muted;
+}
+
+@utility field {
+  @apply w-full rounded-md border border-line bg-white px-3 py-2 text-sm outline-none focus:border-carbon focus:ring-2 focus:ring-carbon-soft;
+}
+
+@utility code {
+  @apply font-mono text-[13px] tracking-tight;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+/* The one orchestrated motion: an email lands in its lane, sliding in with a carbon glow that settles. */
+@keyframes land {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px);
+    background-color: var(--color-carbon-soft);
+  }
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    background-color: #fff;
+  }
+}
+.land {
+  animation: land 1.2s ease-out;
+}
+
+mark.ai-read {
+  background: var(--color-carbon-soft);
+  color: var(--color-carbon-dark);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+mark.unverified {
+  background: var(--color-blocked-soft);
+  color: var(--color-blocked);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .land {
+    animation: none;
+  }
+  .spinner {
+    animation-duration: 2s;
+  }
+}

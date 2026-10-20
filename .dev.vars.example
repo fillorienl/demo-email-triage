@@ -1,0 +1,10 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+ANTHROPIC_API_KEY=
+MISTRAL_API_KEY=
+# Cloudflare's always-pass Turnstile test secret; use the real one in production (wrangler secret put TURNSTILE_SECRET).
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+# fixture = no AI calls, seed emails use seed/expected/*.json. live = real AI.
+AI_MODE=fixture
+# Local only: lets /admin work without Cloudflare Access.
+DEV_ADMIN=1

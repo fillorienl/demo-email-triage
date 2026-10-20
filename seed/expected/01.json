@@ -1,0 +1,28 @@
+{
+  "read": {
+    "sub_reason": "asks expected delivery of PO",
+    "secondary_intents": [],
+    "order_refs": [
+      "PO 4471"
+    ],
+    "invoice_refs": [],
+    "products": [
+      "bouten en moeren M10"
+    ],
+    "sentiment": "neutral",
+    "urgency": "high",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.95,
+    "category": "where_is_my_order",
+    "language": "nl",
+    "summary": "Asks when PO 4471 will arrive; needed this week."
+  },
+  "expected": {
+    "lane": "ready",
+    "ruleId": "ready_where_is_my_order"
+  },
+  "draft": "Beste Ruud,\n\nGoed nieuws: uw PO 4471 (ons ordernummer {{order_number}}) is {{shipment_shipped_on}} met {{shipment_carrier}} verzonden. De verwachte levering is {{shipment_expected_delivery}}.\n\nU kunt de zending volgen met trackingcode {{shipment_tracking_code}}:\n{{shipment_tracking_link}}\n\nMet vriendelijke groet,\n{{signature}}"
+}

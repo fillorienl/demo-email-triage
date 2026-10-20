@@ -1,0 +1,26 @@
+{
+  "read": {
+    "sub_reason": "supplier newsletter",
+    "secondary_intents": [],
+    "order_refs": [],
+    "invoice_refs": [],
+    "products": [
+      "winterhandschoenen"
+    ],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": true,
+    "item_condition": "unknown",
+    "confidence": 0.98,
+    "category": "spam",
+    "language": "nl",
+    "summary": "SafeWork PPE newsletter: winter gloves."
+  },
+  "expected": {
+    "lane": "archived",
+    "ruleId": "archive_automated"
+  },
+  "draft": null
+}

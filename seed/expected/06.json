@@ -1,0 +1,24 @@
+{
+  "read": {
+    "sub_reason": "no order number or company given",
+    "secondary_intents": [],
+    "order_refs": [],
+    "invoice_refs": [],
+    "products": [],
+    "sentiment": "neutral",
+    "urgency": "normal",
+    "threatens_to_leave_or_legal": false,
+    "contains_instructions_to_assistant": false,
+    "is_automated": false,
+    "item_condition": "unknown",
+    "confidence": 0.9,
+    "category": "where_is_my_order",
+    "language": "nl",
+    "summary": "Asks where his order is; no order number or company."
+  },
+  "expected": {
+    "lane": "ready",
+    "ruleId": "ready_ask_order_number"
+  },
+  "draft": "Hoi Tom,\n\nWe zoeken het graag voor je uit. We kunnen je e-mailadres niet aan een klantaccount koppelen. Wil je ons het ordernummer of je eigen bestelreferentie sturen, en de naam van het bedrijf waarvoor je bestelde?\n\nMet vriendelijke groet,\n{{signature}}"
+}

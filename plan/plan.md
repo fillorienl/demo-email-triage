@@ -220,6 +220,10 @@ Cut first if it runs over: compose-test-email, minutes-saved tile, the German em
 
 - Mailbox name: `service@fillorie.nl` is a placeholder. Any address on fillorie.nl works the same way.
 - Cap values (20 live AI emails per sandbox, 300 AI calls per day) are starting guesses; set them from the per-email cost after the first real runs.
+- Model: `claude-sonnet-5-5` for both steps, or Haiku for the read step to cut cost. Decide after the first real runs.
+- API key: a separate key with a spend limit for the public demo, or reuse the invoice demo's.
+- Whether the Mistral (EU) option is tested and shown on calls, or only mentioned.
+- Where the link is shared: fillorie.nl, outreach emails, after calls only.
 
 ## Sources
 

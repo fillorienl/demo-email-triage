@@ -30,7 +30,10 @@ export function Board() {
 
   const emails = state.emails;
   const inbox = emails.filter((e) => !e.lane);
+  // Tiles count everything triaged into a lane; the lane columns show only what still needs sending.
   const byLane = (l: Lane) => emails.filter((e) => e.lane === l);
+  const openInLane = (l: Lane) => byLane(l).filter((e) => e.status !== "sent");
+  const sentInLane = (l: Lane) => byLane(l).length - openInLane(l).length;
   const done = emails.length - inbox.length;
   const noTyping = byLane("ready").length + byLane("archived").length;
   const pending = inbox.filter((e) => e.status === "new" || e.status === "error").length;
@@ -55,6 +58,7 @@ export function Board() {
           <div key={l.id} className="panel p-4">
             <div className={`text-xs font-medium ${LANE_STYLE[l.id].text}`}>{l.label}</div>
             <div className="mt-1 text-2xl font-semibold tabular-nums">{byLane(l.id).length}</div>
+            {sentInLane(l.id) > 0 && <div className="mt-0.5 text-[11px] text-muted">{sentInLane(l.id)} sent</div>}
           </div>
         ))}
         <div className="panel p-4">
@@ -114,16 +118,23 @@ export function Board() {
         <section className="grid gap-4 md:grid-cols-2">
           {LANES.map((l) => (
             <div key={l.id}>
-              <SectionTitle right={<span className="text-xs tabular-nums text-muted">{byLane(l.id).length}</span>}>
+              <SectionTitle right={<span className="text-xs tabular-nums text-muted">{openInLane(l.id).length}</span>}>
                 <span className={LANE_STYLE[l.id].text}>{l.label}</span>
               </SectionTitle>
               <p className="-mt-2 mb-2 text-xs text-faint">{l.hint}</p>
               <div className="space-y-2">
-                {byLane(l.id).length === 0 && <div className="rounded-[10px] border border-dashed border-line px-4 py-6 text-center text-xs text-faint">Nothing here yet</div>}
-                {byLane(l.id).map((e) => (
+                {openInLane(l.id).length === 0 && (
+                  <div className="rounded-[10px] border border-dashed border-line px-4 py-6 text-center text-xs text-faint">{sentInLane(l.id) ? "All sent" : "Nothing here yet"}</div>
+                )}
+                {openInLane(l.id).map((e) => (
                   <LaneCard key={e.id} e={e} />
                 ))}
               </div>
+              {sentInLane(l.id) > 0 && (
+                <Link href="/system" className="mt-2 block text-xs text-muted hover:text-carbon">
+                  {sentInLane(l.id)} sent · in Orders &amp; outbox →
+                </Link>
+              )}
             </div>
           ))}
         </section>
@@ -168,10 +179,7 @@ function InboxRow({ e, busy, onRetry }: { e: EmailSummary; busy: boolean; onRetr
 function LaneCard({ e }: { e: EmailSummary }) {
   return (
     <Link href={`/email/${e.id}`} className="land panel block px-4 py-3 transition-colors hover:border-faint">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="truncate text-sm font-medium">{e.subject}</span>
-        {e.status === "sent" && <Chip tone="ok">sent</Chip>}
-      </div>
+      <div className="truncate text-sm font-medium">{e.subject}</div>
       <div className="truncate text-xs text-muted">{e.fromName}</div>
       {e.summary && <div className="mt-1 line-clamp-2 text-[13px]">{e.summary}</div>}
       {e.reason && <div className={`mt-1 text-xs ${e.lane ? LANE_STYLE[e.lane].text : ""}`}>{e.reason}</div>}

@@ -22,13 +22,12 @@
 			"zone_name": "fillorie.nl"
 		}
 	],
+	// Assets sit at the root of dist/client, but are requested under /email-triage/. assets.base_path isn't enabled on
+	// this account, so every request runs the Worker first and it strips the prefix before calling ASSETS (worker/index.ts).
 	"assets": {
-		"base_path": "/email-triage/",
+		"binding": "ASSETS",
 		"not_found_handling": "single-page-application",
-		"run_worker_first": [
-			"/email-triage/api/*",
-			"/email-triage/admin/api/*"
-		]
+		"run_worker_first": true
 	},
 	"d1_databases": [
 		{

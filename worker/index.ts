@@ -374,6 +374,21 @@ admin.post("/sandboxes/clear", async (c) => {
 
 app.route("/admin/api", admin);
 
+// ---------- static app ----------
+
+// Unknown API paths stay JSON 404s instead of falling through to the SPA.
+app.all("/api/*", (c) => c.json({ error: "Not found" }, 404));
+app.all("/admin/api/*", (c) => c.json({ error: "Not found" }, 404));
+
+// The build puts assets at the root of dist/client, so drop BASE before asking ASSETS.
+// The Vite dev server already serves them under BASE, so dev passes the path through.
+app.all("*", (c) => {
+  if (import.meta.env.DEV) return c.env.ASSETS.fetch(c.req.raw);
+  const url = new URL(c.req.url);
+  url.pathname = url.pathname.slice(BASE.length) || "/";
+  return c.env.ASSETS.fetch(new Request(url, c.req.raw));
+});
+
 // ---------- cleanup ----------
 
 async function cleanup(env: Env) {

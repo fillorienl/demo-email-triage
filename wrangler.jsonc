@@ -1,43 +1,65 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "triage-demo",
-  "main": "worker/index.ts",
-  "compatibility_date": "2026-10-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
-  // Public only under demos.fillorie.nl/email-triage; the workers.dev URL stays off so /admin can't be reached around Access.
-  // demos.fillorie.nl itself is the demo-hub Worker's custom domain. Routes run before it, so these paths reach this Worker.
-  "workers_dev": false,
-  "routes": [
-    { "pattern": "demos.fillorie.nl/email-triage", "zone_name": "fillorie.nl" },
-    { "pattern": "demos.fillorie.nl/email-triage/*", "zone_name": "fillorie.nl" }
-  ],
-  "assets": {
-    "base_path": "/email-triage/",
-    "not_found_handling": "single-page-application",
-    "run_worker_first": ["/email-triage/api/*", "/email-triage/admin/api/*"]
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "triage-demo",
-      // Fill in after: npx wrangler d1 create triage-demo --jurisdiction eu
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "triggers": { "crons": ["17 3 * * *"] },
-  "vars": {
-    "AI_MODE": "live",
-    "LLM_PROVIDER": "anthropic",
-    "ANTHROPIC_MODEL": "claude-haiku-5-5",
-    "MISTRAL_MODEL": "mistral-medium-latest",
-    "TURNSTILE_SITE_KEY": "",
-    "CAP_SANDBOX_LIVE_PER_DAY": "20",
-    "CAP_GLOBAL_AI_CALLS_PER_DAY": "300",
-    "RETENTION_DAYS": "7",
-    "INBOUND_ADDRESS": "service@fillorie.nl",
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "triage-demo",
+	"main": "worker/index.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true
+	},
+	// Public only under demos.fillorie.nl/email-triage; the workers.dev URL stays off so /admin can't be reached around Access.
+	// demos.fillorie.nl itself is the demo-hub Worker's custom domain. Routes run before it, so these paths reach this Worker.
+	"workers_dev": false,
+	"routes": [
+		{
+			"pattern": "demos.fillorie.nl/email-triage",
+			"zone_name": "fillorie.nl"
+		},
+		{
+			"pattern": "demos.fillorie.nl/email-triage/*",
+			"zone_name": "fillorie.nl"
+		}
+	],
+	"assets": {
+		"base_path": "/email-triage/",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": [
+			"/email-triage/api/*",
+			"/email-triage/admin/api/*"
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "triage-demo",
+			// Fill in after: npx wrangler d1 create triage-demo --jurisdiction eu
+			"database_id": "38fb1af9-4866-4d05-ad5e-7d622a72796f",
+			"migrations_dir": "migrations"
+		},
+		// {
+		// 	"binding": "triage_demo",
+		// 	"database_name": "triage-demo",
+		// 	"database_id": "97200063-f14d-465b-a241-5511c56cef09"
+		// }
+	],
+	"triggers": {
+		"crons": [
+			"17 3 * * *"
+		]
+	},
+	"vars": {
+		"AI_MODE": "live",
+		"LLM_PROVIDER": "anthropic",
+		"ANTHROPIC_MODEL": "claude-haiku-5-5",
+		"MISTRAL_MODEL": "mistral-medium-latest",
+		"TURNSTILE_SITE_KEY": "0x4AAAAAAFfX0Hp65GA70NNj",
+		"CAP_SANDBOX_LIVE_PER_DAY": "20",
+		"CAP_GLOBAL_AI_CALLS_PER_DAY": "300",
+		"RETENTION_DAYS": "7",
+		"INBOUND_ADDRESS": "triage-service@fillorie.nl",
+		"ACCESS_TEAM_DOMAIN": "",
+		"ACCESS_AUD": ""
+	}
 }

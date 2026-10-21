@@ -25,7 +25,10 @@ import {
 } from "./store";
 
 type App = { Bindings: Env; Variables: { sandbox: SandboxRow } };
-const app = new Hono<App>();
+
+/** Path the demo is served under (demos.fillorie.nl/email-triage); matches `base` in vite.config.ts. */
+const BASE = "/email-triage";
+const app = new Hono<App>().basePath(BASE);
 
 const COOKIE = "triage_sandbox";
 
@@ -73,7 +76,7 @@ app.post("/api/start", async (c) => {
     httpOnly: true,
     secure: new URL(c.req.url).protocol === "https:",
     sameSite: "Lax",
-    path: "/",
+    path: BASE,
     maxAge: Number(c.env.RETENTION_DAYS) * 86_400,
   });
   return c.json({ ok: true, code: sb.code });

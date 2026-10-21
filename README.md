@@ -12,7 +12,7 @@ Plan: [plan/plan.md](plan/plan.md). Deployment: [SETUP.md](SETUP.md).
 npm install
 cp .dev.vars.example .dev.vars      # fixture mode, no API key needed
 npm run db:migrate:local
-npm run dev                         # http://localhost:5173
+npm run dev                         # http://localhost:5173/email-triage/
 ```
 
 Fixture mode (`AI_MODE=fixture`) replays `seed/expected/*.json` for the 11 seed emails. For real AI, put `ANTHROPIC_API_KEY` in `.dev.vars` and set `AI_MODE=live`. For Mistral (EU-hosted), set `LLM_PROVIDER=mistral` and `MISTRAL_API_KEY`.

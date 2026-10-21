@@ -1,6 +1,6 @@
 # Setup guide
 
-How to run the email triage demo locally, deploy it to `triage.fillorie.nl`, and connect live email from `service@fillorie.nl`.
+How to run the email triage demo locally, deploy it to `demos.fillorie.nl/email-triage`, and connect live email from `service@fillorie.nl`.
 
 - **Part A** (local) takes 5 minutes and needs no accounts.
 - **Parts B–D** need the Cloudflare account that hosts fillorie.nl and Google Workspace admin access.
@@ -56,7 +56,7 @@ npm run db:migrate:local
 npm run dev
 ```
 
-Open <http://localhost:5173> and click **Process inbox**. The bot check uses Cloudflare's always-pass test keys locally. `/admin` is open locally because `.dev.vars` sets `DEV_ADMIN=1`.
+Open <http://localhost:5173/email-triage/> and click **Process inbox**. The bot check uses Cloudflare's always-pass test keys locally. `/admin` is open locally because `.dev.vars` sets `DEV_ADMIN=1`.
 
 ### A4. Tests
 
@@ -78,7 +78,7 @@ The email appears in the inbox within a few seconds. In offline test mode it sho
 
 ---
 
-## Part B: Deploy to triage.fillorie.nl
+## Part B: Deploy to demos.fillorie.nl/email-triage
 
 Log in once with `npx wrangler login`, using the account that holds the fillorie.nl zone.
 
@@ -102,7 +102,7 @@ npm run db:migrate:remote
 
 Dashboard → Turnstile → **Add widget**:
 
-- Hostname: `triage.fillorie.nl`
+- Name: `triage-demo`, hostname: `demos.fillorie.nl`. The demo hub's widget uses the same hostname; a separate widget keeps each one's keys and stats apart.
 - Mode: **Managed**
 
 Put the **site key** in `wrangler.jsonc` → `vars.TURNSTILE_SITE_KEY`. The secret key goes in the next step.
@@ -141,15 +141,17 @@ In `wrangler.jsonc` → `vars`:
 npm run deploy
 ```
 
-The `custom_domain` route creates the DNS record and certificate for `triage.fillorie.nl` itself. `workers_dev` is off, so there is no `*.workers.dev` URL around the admin protection.
+The demo runs on two Worker routes, `demos.fillorie.nl/email-triage` and `demos.fillorie.nl/email-triage/*`. `demos.fillorie.nl` itself is the demo-hub Worker's custom domain, so deploy the hub first: it creates the DNS record and certificate. Routes run before a custom domain, so requests under `/email-triage` reach this Worker and everything else stays with the hub. `workers_dev` is off, so there is no `*.workers.dev` URL around the admin protection.
 
-Check: open <https://triage.fillorie.nl>, click **Process inbox**, and confirm the 11 emails land as 4 / 2 / 4 / 1. The first run uses live AI and fills the seed cache. Later visitors see "cached AI result".
+The path is set in three places that must match: `base` in `vite.config.ts`, `routes` and `assets` in `wrangler.jsonc`, and `BASE` in `worker/index.ts`.
+
+Check: open <https://demos.fillorie.nl/email-triage/>, click **Process inbox**, and confirm the 11 emails land as 4 / 2 / 4 / 1. The first run uses live AI and fills the seed cache. Later visitors see "cached AI result".
 
 ### B7. Protect /admin with Cloudflare Access
 
 Zero Trust → Access → Applications → **Add an application** → Self-hosted:
 
-- Domain: `triage.fillorie.nl`, path: `admin`. This covers `/admin` and `/admin/api/*`.
+- Domain: `demos.fillorie.nl`, path: `email-triage/admin`. This covers `/email-triage/admin` and `/email-triage/admin/api/*`.
 - Policy: Allow, include → Emails → your address. Login method: one-time PIN.
 
 Then copy two values into `wrangler.jsonc` → `vars` and deploy again:
@@ -159,7 +161,7 @@ Then copy two values into `wrangler.jsonc` → `vars` and deploy again:
 
 The Worker checks the Access token itself as well. Without these two values the admin API stays closed.
 
-Check: <https://triage.fillorie.nl/admin> asks for a PIN, and after login shows usage and the seed cache.
+Check: <https://demos.fillorie.nl/email-triage/admin> asks for a PIN, and after login shows usage and the seed cache.
 
 ---
 
@@ -215,7 +217,7 @@ Run through this once after deploying (it follows the plan's acceptance criteria
 - [ ] `dig MX fillorie.nl` still shows Google
 - [ ] Look at the board on a phone
 
-Then add the subdomain, Email Routing rule, Google routing rule, Access app and D1 database to Fillorie Configuration Management.
+Then add the Worker routes, Email Routing rule, Google routing rule, Access app and D1 database to Fillorie Configuration Management.
 
 ---
 
@@ -233,7 +235,7 @@ Then add the subdomain, Email Routing rule, Google routing rule, Access app and 
 
 | Symptom | Likely cause |
 | --- | --- |
-| "The bot check failed" | `TURNSTILE_SECRET` doesn't match the site key, or the widget's hostname isn't `triage.fillorie.nl` |
+| "The bot check failed" | `TURNSTILE_SECRET` doesn't match the site key, or the widget's hostname isn't `demos.fillorie.nl` |
 | Emails show "failed: ANTHROPIC_API_KEY is not set" | Secret missing: `npx wrangler secret put ANTHROPIC_API_KEY` |
 | "Offline test mode only covers the 11 seed emails" | `AI_MODE=fixture` is set in `.dev.vars` or `wrangler.jsonc` |
 | `/admin` says "Admin only" after the PIN | `ACCESS_TEAM_DOMAIN` or `ACCESS_AUD` wrong or missing |

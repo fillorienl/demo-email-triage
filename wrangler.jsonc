@@ -5,12 +5,17 @@
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // Public only on the custom domain; the workers.dev URL stays off so /admin can't be reached around Access.
+  // Public only under demos.fillorie.nl/email-triage; the workers.dev URL stays off so /admin can't be reached around Access.
+  // demos.fillorie.nl itself is the demo-hub Worker's custom domain. Routes run before it, so these paths reach this Worker.
   "workers_dev": false,
-  "routes": [{ "pattern": "triage.fillorie.nl", "custom_domain": true }],
+  "routes": [
+    { "pattern": "demos.fillorie.nl/email-triage", "zone_name": "fillorie.nl" },
+    { "pattern": "demos.fillorie.nl/email-triage/*", "zone_name": "fillorie.nl" }
+  ],
   "assets": {
+    "base_path": "/email-triage/",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*", "/admin/api/*"]
+    "run_worker_first": ["/email-triage/api/*", "/email-triage/admin/api/*"]
   },
   "d1_databases": [
     {

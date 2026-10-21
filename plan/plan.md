@@ -12,7 +12,7 @@ Customer emails ("where's my order?", returns, complaints) land in a service inb
 | # | Decision | Why |
 |---|---|---|
 | 1 | Fictional company: **Veldhuis Industrial Supply B.V.** (same wholesaler as the other two demos), reusing the customers from the case study | All three demos tell one story: Veldhuis's orders@, facturen@ and service@ inboxes. A webshop variant is just a different seed file later. |
-| 2 | Host: one Cloudflare Worker on **`triage.fillorie.nl`** | Fits the existing setup: fillorie.nl already runs on Workers, DNS is on Cloudflare, free plan allows commercial use. |
+| 2 | Host: one Cloudflare Worker at **`demos.fillorie.nl/email-triage`** (live email via `inbox@triage.fillorie.nl`) | Fits the existing setup: fillorie.nl already runs on Workers, DNS is on Cloudflare, free plan allows commercial use. |
 | 3 | Stack: **Hono** (API) + **Vite/React SPA** served as Workers static assets + **D1** (SQLite) created with the EU jurisdiction | Next.js on Workers needs the OpenNext adapter and a heavier bundle; the free plan's 10 ms CPU limit and bundle size make the small stack the safer choice. The JSON-file store from the invoice demo doesn't work on Workers (no filesystem), so D1 replaces it. |
 | 4 | Pipeline: **AI reads → code decides → AI drafts from facts → person sends** | Same philosophy as the invoice demo: every routing decision can be explained, and nothing goes out without a click. |
 | 5 | AI provider: port the provider switch from the invoice demo (Claude default, Mistral as the EU-hosted option) | Text-only emails, so no PDF handling is needed. Mistral gives an "everything stays in the EU" answer on a call. |
@@ -154,13 +154,13 @@ Visual style: reuse the invoice demo's Tailwind tokens and IBM Plex fonts so the
 
 | Item | How | Note |
 |---|---|---|
-| Worker + subdomain | `wrangler.jsonc` route `{ "pattern": "triage.fillorie.nl", "custom_domain": true }` | Workers creates the DNS record and certificate itself. |
+| Worker + path | `wrangler.jsonc` routes `demos.fillorie.nl/email-triage` and `demos.fillorie.nl/email-triage/*`, `assets.base_path` `/email-triage/` | The demo-hub Worker owns `demos.fillorie.nl` as a custom domain; routes run before it. |
 | Database | `npx wrangler d1 create triage-demo --jurisdiction eu` | Jurisdiction can only be set at creation. |
 | Secrets | `wrangler secret put ANTHROPIC_API_KEY` (and `MISTRAL_API_KEY`, `TURNSTILE_SECRET`) | Never in the repo; `.dev.vars` for local. |
 | Inbound (Cloudflare) | Email Routing → add subdomain `triage.fillorie.nl` → route `inbox@` to the Worker | Subdomain only; root MX stays on Google. |
 | Inbound (Google) | Alias `service@fillorie.nl` + Default routing rule adding `inbox@triage.fillorie.nl` as recipient | See "Live email". |
-| Bot check | Turnstile widget for `triage.fillorie.nl` | Free. |
-| Admin gate | Zero Trust → Access → self-hosted app on `triage.fillorie.nl/admin`, policy: your email + one-time PIN | Only `/admin`; the demo itself is public. |
+| Bot check | Turnstile widget for `demos.fillorie.nl` | Free. |
+| Admin gate | Zero Trust → Access → self-hosted app on `demos.fillorie.nl/email-triage/admin`, policy: your email + one-time PIN | Only `/admin`; the demo itself is public. |
 | Cleanup | Daily cron trigger | 7-day retention. |
 | Record it | Add the subdomain, Email Routing and routing rule to [[Fillorie Configuration Management]] | |
 

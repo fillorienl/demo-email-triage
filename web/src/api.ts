@@ -33,6 +33,7 @@ export interface EmailSummary {
   urgency?: string | null;
   language?: string | null;
   draftKind?: "reply" | "holding" | "suggested" | null;
+  hasReviewerNote?: boolean;
   groundingOk?: boolean | null;
 }
 
@@ -77,7 +78,7 @@ export interface EmailDetail {
     model: string | null;
     ms: number;
   } | null;
-  draft: { kind: "reply" | "holding" | "suggested"; body: string; grounding: GroundingResult; edited: boolean } | null;
+  draft: { kind: "reply" | "holding" | "suggested"; body: string; reviewerNote: string | null; grounding: GroundingResult; edited: boolean } | null;
   audit: AuditEntry[];
 }
 

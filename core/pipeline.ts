@@ -48,3 +48,9 @@ export function applyGrounding(routed: RouteResult, draft: string, facts: Facts,
   }
   return { routed, grounding };
 }
+
+/** After drafting: a question from the AI to the reviewer means a person looks before anything is sent. */
+export function applyReviewerNote(routed: RouteResult, note: string | null): RouteResult {
+  if (!note || routed.lane !== "ready") return routed;
+  return { ...routed, lane: "needs_look", ruleId: "look_reviewer_note", reason: "The AI has a question for the reviewer before this goes out" };
+}

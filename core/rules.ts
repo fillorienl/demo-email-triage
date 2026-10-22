@@ -94,7 +94,7 @@ export const RULES: Rule[] = [
     ruleId: "look_sender_not_on_file",
     when: (s) => s.hasOrder && s.orderOfOtherCustomer,
     lane: "needs_look",
-    reason: "Sender is not on file for this order's customer: check before sharing order details",
+    reason: "Order reference belongs to another customer than the sender: no order details in the draft",
     routeTo: null,
     draft: "reply",
   },

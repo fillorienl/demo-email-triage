@@ -189,6 +189,7 @@ function LaneCard({ e }: { e: EmailSummary }) {
         {e.urgency === "high" && <Chip tone="bad">urgent</Chip>}
         {e.routeTo && <Chip>→ {e.routeTo}</Chip>}
         {e.draftKind && (e.groundingOk ? <Chip tone="ok">facts verified</Chip> : <Chip tone="warn">check draft</Chip>)}
+        {e.hasReviewerNote && <Chip tone="warn">AI asks for input</Chip>}
         {e.source === "live" && <Chip tone="carbon">live email</Chip>}
         <AiModeChip mode={e.aiMode} />
       </div>

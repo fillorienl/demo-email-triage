@@ -110,7 +110,7 @@ export async function lookup(
   const shipments = order ? await os.shipments(order.id) : [];
 
   const returnDecisions: ReturnDecision[] = [];
-  if (order && (read.category === "return_request" || read.secondary_intents.includes("return_request"))) {
+  if (order && order.debtorId === customer?.debtorId && (read.category === "return_request" || read.secondary_intents.includes("return_request"))) {
     for (const l of await linesMentioned(order, read, emailText, os)) {
       returnDecisions.push(decideReturn(l, await os.product(l.sku), read.item_condition, today, policy));
     }

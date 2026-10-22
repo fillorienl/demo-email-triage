@@ -38,6 +38,7 @@ export interface DraftRow {
   email_id: string;
   kind: "reply" | "holding" | "suggested";
   body: string;
+  reviewer_note: string | null;
   grounding_json: string;
   edited: number;
 }
@@ -180,7 +181,7 @@ export async function saveTriage(
     model: string | null;
     ms: number;
   },
-  draft: { kind: DraftRow["kind"]; body: string; grounding: GroundingResult } | null,
+  draft: { kind: DraftRow["kind"]; body: string; reviewerNote: string | null; grounding: GroundingResult } | null,
   auditLines: { actor: "ai" | "code"; action: string; detail?: string }[],
 ) {
   const now = Date.now();
@@ -194,8 +195,8 @@ export async function saveTriage(
       .bind(emailId, sandboxId, JSON.stringify(t.read), JSON.stringify(t.context), JSON.stringify(t.facts), t.lane, t.ruleId, t.reason, t.routeTo, t.lang, t.aiMode, t.model, t.ms, now),
     draft
       ? db
-          .prepare("INSERT OR REPLACE INTO drafts (email_id, sandbox_id, kind, body, grounding_json, edited, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?)")
-          .bind(emailId, sandboxId, draft.kind, draft.body, JSON.stringify(draft.grounding), now)
+          .prepare("INSERT OR REPLACE INTO drafts (email_id, sandbox_id, kind, body, reviewer_note, grounding_json, edited, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?)")
+          .bind(emailId, sandboxId, draft.kind, draft.body, draft.reviewerNote, JSON.stringify(draft.grounding), now)
       : db.prepare("DELETE FROM drafts WHERE email_id = ? AND sandbox_id = ?").bind(emailId, sandboxId),
     db.prepare("UPDATE emails SET status = ?, error = NULL, updated_at = ? WHERE id = ? AND sandbox_id = ?").bind(status, now, emailId, sandboxId),
     ...auditLines.map((a) => audit(db, sandboxId, emailId, a.actor, a.action, a.detail)),
@@ -225,14 +226,24 @@ export async function counter(db: D1Database, key: string): Promise<number> {
 
 export async function getSeedCache(db: D1Database, seedNo: number, modelKey: string) {
   return db
-    .prepare("SELECT read_json, draft_template, model FROM seed_ai_cache WHERE seed_no = ? AND model_key = ?")
+    .prepare("SELECT read_json, draft_template, reviewer_note_template, model FROM seed_ai_cache WHERE seed_no = ? AND model_key = ?")
     .bind(seedNo, modelKey)
-    .first<{ read_json: string; draft_template: string | null; model: string | null }>();
+    .first<{ read_json: string; draft_template: string | null; reviewer_note_template: string | null; model: string | null }>();
 }
 
-export async function putSeedCache(db: D1Database, seedNo: number, modelKey: string, read: ReadResult, draftTemplate: string | null, model: string | null) {
+export async function putSeedCache(
+  db: D1Database,
+  seedNo: number,
+  modelKey: string,
+  read: ReadResult,
+  draftTemplate: string | null,
+  reviewerNoteTemplate: string | null,
+  model: string | null,
+) {
   await db
-    .prepare("INSERT OR REPLACE INTO seed_ai_cache (seed_no, model_key, read_json, draft_template, model, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-    .bind(seedNo, modelKey, JSON.stringify(read), draftTemplate, model, Date.now())
+    .prepare(
+      "INSERT OR REPLACE INTO seed_ai_cache (seed_no, model_key, read_json, draft_template, reviewer_note_template, model, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(seedNo, modelKey, JSON.stringify(read), draftTemplate, reviewerNoteTemplate, model, Date.now())
     .run();
 }

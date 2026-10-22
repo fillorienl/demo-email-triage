@@ -82,7 +82,7 @@ app.post("/api/start", async (c) => {
   return c.json({ ok: true, code: sb.code });
 });
 
-type SummaryRow = EmailRow & Partial<Pick<TriageRow, "lane" | "reason" | "route_to" | "rule_id" | "ai_mode" | "read_json">> & { draft_kind: string | null; grounding_json: string | null };
+type SummaryRow = EmailRow & Partial<Pick<TriageRow, "lane" | "reason" | "route_to" | "rule_id" | "ai_mode" | "read_json">> & { draft_kind: string | null; reviewer_note: string | null; grounding_json: string | null };
 
 function summary(r: SummaryRow) {
   const read = r.read_json ? JSON.parse(r.read_json) : null;
@@ -108,6 +108,7 @@ function summary(r: SummaryRow) {
     urgency: read?.urgency ?? null,
     language: read?.language ?? null,
     draftKind: r.draft_kind,
+    hasReviewerNote: !!r.reviewer_note,
     groundingOk: grounding ? grounding.ok : null,
   };
 }
@@ -135,7 +136,7 @@ app.get("/api/state", async (c) => {
   }
   c.executionCtx.waitUntil(touchSandbox(c.env.DB, sb.id));
   const { results } = await c.env.DB.prepare(
-    `SELECT e.*, t.lane, t.reason, t.route_to, t.rule_id, t.ai_mode, t.read_json, d.kind AS draft_kind, d.grounding_json
+    `SELECT e.*, t.lane, t.reason, t.route_to, t.rule_id, t.ai_mode, t.read_json, d.kind AS draft_kind, d.reviewer_note, d.grounding_json
        FROM emails e
        LEFT JOIN triage_results t ON t.email_id = e.id
        LEFT JOIN drafts d ON d.email_id = e.id
@@ -225,7 +226,7 @@ app.get("/api/emails/:id", needSandbox, async (c) => {
       model: triage.model,
       ms: triage.ms,
     },
-    draft: draft && { kind: draft.kind, body: draft.body, grounding: JSON.parse(draft.grounding_json), edited: !!draft.edited },
+    draft: draft && { kind: draft.kind, body: draft.body, reviewerNote: draft.reviewer_note, grounding: JSON.parse(draft.grounding_json), edited: !!draft.edited },
     audit: auditRows.results,
   });
 });

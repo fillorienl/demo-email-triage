@@ -155,6 +155,12 @@ export function Review({ id }: { id: string }) {
             <div className="space-y-3">
               {draft.kind === "suggested" && <p className="text-xs text-review">A person decides on this one. The reply below is a suggestion they can use.</p>}
               {draft.kind === "holding" && <p className="text-xs text-muted">A short acknowledgement while {triage.routeTo ?? "a person"} takes over.</p>}
+              {draft.reviewerNote && (
+                <div className="rounded-md bg-review-soft px-3 py-2 text-xs text-review">
+                  <div className="font-medium">Note to you from the AI (not part of the email)</div>
+                  <p className="mt-0.5 whitespace-pre-wrap">{draft.reviewerNote}</p>
+                </div>
+              )}
               <textarea
                 className="field min-h-[320px] resize-y font-sans leading-relaxed"
                 value={body}

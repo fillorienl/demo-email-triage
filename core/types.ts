@@ -124,6 +124,13 @@ export interface GroundingIssue {
   text: string;
 }
 
+/** What the AI draft step returns. Only `body` ever goes to the customer. */
+export interface DraftText {
+  body: string;
+  /** A question for the person reviewing the draft; null when the AI had nothing to ask. */
+  reviewerNote: string | null;
+}
+
 export interface GroundingResult {
   ok: boolean;
   checked: number;

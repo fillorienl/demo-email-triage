@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { addDays } from "../core/dates";
 import { checkGrounding } from "../core/grounding";
-import { applyGrounding, decide } from "../core/pipeline";
+import { applyGrounding, applyReviewerNote, decide } from "../core/pipeline";
 import { fillTemplate, toTemplate } from "../core/template";
 import type { Lane, ReadResult } from "../core/types";
 import { SEED_EMAILS } from "../seed/emails";
@@ -104,5 +104,42 @@ describe("draft templates", () => {
     const tpl = toTemplate("Donderdag 22 oktober komt order VIS-SO-26-1187. Dus donderdag 22 oktober.", facts);
     expect(tpl).toBe("{{^eta}} komt order {{order_number}}. Dus {{eta}}.");
     expect(fillTemplate(tpl, { eta: "vrijdag 23 oktober", order_number: "VIS-SO-26-1187" }).text).toBe("Vrijdag 23 oktober komt order VIS-SO-26-1187. Dus vrijdag 23 oktober.");
+  });
+});
+
+describe("order of another customer", () => {
+  // Hofstede's PO 4471 (VIS-SO-26-1187, shipped by DHL), asked about by someone who isn't Hofstede.
+  async function ask(fromEmail: string, category: ReadResult["category"]) {
+    const read = { ...load(1).read, category, order_refs: ["PO 4471"] };
+    const emailText = "Waar blijft PO 4471?";
+    return decide(
+      { read, fromEmail, emailText, today: "2026-10-21", rmaNumber: "RMA-26-0417", signature, returnAddress: COMPANY.address, policy: RETURN_POLICY },
+      mockOrderSystem("2026-10-21"),
+    );
+  }
+
+  it.each([
+    ["an unknown sender", "someone@gmail.com", "where_is_my_order"],
+    ["another customer", "inkoop@klaassen-installatie.nl", "where_is_my_order"],
+    ["another customer asking for a return", "inkoop@klaassen-installatie.nl", "return_request"],
+  ] as const)("never reaches the draft facts for %s", async (_who, fromEmail, category) => {
+    const d = await ask(fromEmail, category);
+    expect(d.routed.ruleId).toBe("look_sender_not_on_file");
+    expect(d.ctx.returnDecisions).toEqual([]);
+    const facts = JSON.stringify(d.facts);
+    for (const leaked of ["VIS-SO-26-1187", "4471", "Hofstede", "DHL", "JVGL", "RMA-"]) expect(facts).not.toContain(leaked);
+    expect(d.facts.order_found).toMatch(/^not shared/);
+  });
+});
+
+describe("reviewer note", () => {
+  const ready = { lane: "ready", ruleId: "ready_where_is_my_order", reason: "", routeTo: null, draft: "reply" } as const;
+
+  it("drops a Ready email to Needs a look when the AI has a question", () => {
+    expect(applyReviewerNote(ready, "Which of the two orders does the customer mean?")).toMatchObject({ lane: "needs_look", ruleId: "look_reviewer_note" });
+  });
+
+  it("leaves the lane alone without a question", () => {
+    expect(applyReviewerNote(ready, null)).toBe(ready);
   });
 });

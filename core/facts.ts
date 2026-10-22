@@ -24,14 +24,14 @@ export function buildFacts(read: ReadResult, ctx: LookupContext, routed: RouteRe
   if (ctx.customer) f.customer_name = ctx.customer.name;
   else f.sender_on_file = "no: sender's email address is not linked to a customer account";
 
-  const o = ctx.order;
+  // An order that isn't the sender's own never reaches the draft: not its lines, dates, shipments or returns.
+  const o = ctx.order && ctx.order.debtorId === ctx.customer?.debtorId ? ctx.order : null;
   if (o) {
     f.order_number = o.id;
     f.customer_order_reference = o.customerRef;
     f.order_date = date(o.orderedOn);
     f.promised_delivery_date = date(o.promisedOn);
     f.order_lines = o.lines.map((l) => `${l.qty} × ${l.description} (${l.unit})`).join("; ");
-    if (o.debtorId !== ctx.customer?.debtorId) f.sender_matches_order_customer = "no";
 
     ctx.shipments.forEach((s, i) => {
       const k = ctx.shipments.length === 1 ? "shipment" : `shipment_${i + 1}`;
@@ -54,6 +54,9 @@ export function buildFacts(read: ReadResult, ctx: LookupContext, routed: RouteRe
     }
     const delivered = o.lines.filter((l) => l.status === "delivered" && l.deliveredOn);
     if (delivered.length && !ctx.shipments.length) f.delivered_on = date(delivered[0].deliveredOn!);
+  } else if (ctx.order) {
+    f.order_found =
+      "not shared: the order reference in the email is not linked to the sender's email address. Do not confirm, deny or describe anything about that order; say a colleague will check it and get back to them";
   } else if (ctx.orderMatch === "several_open_orders") {
     f.order_found = "no: the customer has several open orders; ask which order number they mean";
   } else {

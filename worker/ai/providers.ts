@@ -4,9 +4,9 @@
  * Pick with LLM_PROVIDER: anthropic | mistral.
  */
 import Anthropic from "@anthropic-ai/sdk";
-import type { Lang, ReadResult, RouteResult } from "../../core/types";
+import type { DraftText, Lang, ReadResult, RouteResult } from "../../core/types";
 import type { Env } from "../env";
-import { DRAFT_SYSTEM, draftUserMessage, parseRead, READ_SCHEMA, READ_SYSTEM, readUserMessage } from "./prompts";
+import { DRAFT_SCHEMA, DRAFT_SYSTEM, draftUserMessage, parseDraft, parseRead, READ_SCHEMA, READ_SYSTEM, readUserMessage } from "./prompts";
 
 export type Provider = "anthropic" | "mistral";
 
@@ -49,9 +49,9 @@ export async function aiDraft(
   facts: Record<string, string>,
   lang: Lang,
   kind: Exclude<RouteResult["draft"], "none">,
-): Promise<AiOut<string>> {
+): Promise<AiOut<DraftText>> {
   const user = draftUserMessage(email, facts, lang, kind);
-  return provider(env) === "mistral" ? mistralText(env, DRAFT_SYSTEM, user) : anthropicText(env, DRAFT_SYSTEM, user);
+  return provider(env) === "mistral" ? mistralDraft(env, user) : anthropicDraft(env, user);
 }
 
 // ---------- Claude ----------
@@ -80,17 +80,17 @@ async function anthropicRead(env: Env, email: EmailInput): Promise<AiOut<ReadRes
   return { value: parseRead(textOf(res)), model: res.model };
 }
 
-async function anthropicText(env: Env, system: string, user: string): Promise<AiOut<string>> {
+async function anthropicDraft(env: Env, user: string): Promise<AiOut<DraftText>> {
   const res = await anthropic(env).beta.messages.create({
     model: env.ANTHROPIC_MODEL,
     max_tokens: 4096,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system,
-    output_config: { effort: "medium" },
+    system: DRAFT_SYSTEM,
+    output_config: { effort: "medium", format: { type: "json_schema", schema: DRAFT_SCHEMA } },
     messages: [{ role: "user", content: user }],
   });
-  return { value: textOf(res).trim(), model: res.model };
+  return { value: parseDraft(textOf(res)), model: res.model };
 }
 
 // ---------- Mistral (EU) ----------
@@ -122,14 +122,15 @@ async function mistralRead(env: Env, email: EmailInput): Promise<AiOut<ReadResul
   return { value: parseRead(text), model };
 }
 
-async function mistralText(env: Env, system: string, user: string): Promise<AiOut<string>> {
+async function mistralDraft(env: Env, user: string): Promise<AiOut<DraftText>> {
   const { text, model } = await mistralChat(env, {
     max_tokens: 1500,
     temperature: 0.2,
+    response_format: { type: "json_schema", json_schema: { name: "email_draft", schema: DRAFT_SCHEMA, strict: true } },
     messages: [
-      { role: "system", content: system },
+      { role: "system", content: DRAFT_SYSTEM },
       { role: "user", content: user },
     ],
   });
-  return { value: text.trim(), model };
+  return { value: parseDraft(text), model };
 }

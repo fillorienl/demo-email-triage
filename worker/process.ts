@@ -3,9 +3,9 @@
  * Seed emails replay cached AI results when available; typed and live emails always use live AI.
  */
 import { todayIso } from "../core/dates";
-import { applyGrounding, decide } from "../core/pipeline";
+import { applyGrounding, applyReviewerNote, decide } from "../core/pipeline";
 import { fillTemplate, toTemplate } from "../core/template";
-import type { AiMode, GroundingResult, ReadResult, RouteResult } from "../core/types";
+import type { AiMode, DraftText, GroundingResult, ReadResult, RouteResult } from "../core/types";
 import { seedExpected } from "../seed/expected";
 import { mockOrderSystem } from "../seed/mockOrderSystem";
 import { COMPANY, RETURN_POLICY } from "../seed/reference";
@@ -60,6 +60,7 @@ export async function processEmail(env: Env, sandboxId: string, emailId: string)
     let aiMode: AiMode;
     let model: string | null = null;
     let cachedTemplate: string | null = null;
+    let cachedNoteTemplate: string | null = null;
     let cacheMiss = false;
 
     if (fixture) {
@@ -74,6 +75,7 @@ export async function processEmail(env: Env, sandboxId: string, emailId: string)
         aiMode = "cached";
         model = cached.model;
         cachedTemplate = cached.draft_template;
+        cachedNoteTemplate = cached.reviewer_note_template;
         await sleep(400 + Math.random() * 700);
       } else {
         await reserveAi(env, sandboxId, 2, !row.seed_no);
@@ -105,35 +107,44 @@ export async function processEmail(env: Env, sandboxId: string, emailId: string)
 
     // ---- 3. AI drafts from facts (or the cached/fixture template, filled with today's facts)
     let routed: RouteResult = d.routed;
-    let draft: { kind: Exclude<RouteResult["draft"], "none">; body: string; grounding: GroundingResult } | null = null;
+    let draft: { kind: Exclude<RouteResult["draft"], "none">; body: string; reviewerNote: string | null; grounding: GroundingResult } | null = null;
     let draftSource: AiMode | null = null;
     if (d.routed.draft !== "none") {
-      let body: string | null = null;
+      let text: DraftText | null = null;
       if (cachedTemplate) {
         const filled = fillTemplate(cachedTemplate, d.facts);
-        if (!filled.missing.length) {
-          body = filled.text;
+        const note = cachedNoteTemplate ? fillTemplate(cachedNoteTemplate, d.facts) : null;
+        if (!filled.missing.length && !note?.missing.length) {
+          text = { body: filled.text, reviewerNote: note?.text ?? null };
           draftSource = aiMode;
         }
       }
-      if (body === null) {
+      if (text === null) {
         if (fixture) throw new Error("No fixture draft for this email.");
         if (aiMode !== "live") await reserveAi(env, sandboxId, 1, false);
         const out = await aiDraft(env, email, d.facts, d.lang, d.routed.draft);
         await bump(env.DB, "global_ai_calls");
-        body = out.value;
+        text = out.value;
         model = out.model;
         draftSource = "live";
       }
-      // ---- 4. Grounding check
-      const g = applyGrounding(d.routed, body, d.facts, emailText);
-      routed = g.routed;
-      draft = { kind: d.routed.draft, body, grounding: g.grounding };
+      // ---- 4. Grounding check, then any question for the reviewer
+      const g = applyGrounding(d.routed, text.body, d.facts, emailText);
+      routed = applyReviewerNote(g.routed, text.reviewerNote);
+      draft = { kind: d.routed.draft, body: text.body, reviewerNote: text.reviewerNote, grounding: g.grounding };
     }
 
     // Only cache a first real run when it lands where the seed is expected to, so a bad run never gets replayed.
     if (cacheMiss && seed && routed.lane === seed.expected.lane) {
-      await putSeedCache(env.DB, row.seed_no!, mk, read, draft ? toTemplate(draft.body, d.facts) : null, model);
+      await putSeedCache(
+        env.DB,
+        row.seed_no!,
+        mk,
+        read,
+        draft ? toTemplate(draft.body, d.facts) : null,
+        draft?.reviewerNote ? toTemplate(draft.reviewerNote, d.facts) : null,
+        model,
+      );
     }
 
     const ctx = d.ctx;
@@ -161,6 +172,7 @@ export async function processEmail(env: Env, sandboxId: string, emailId: string)
           detail: draft.grounding.ok ? `${draft.grounding.checked} dates, numbers and links verified` : draft.grounding.issues.map((i) => `${i.kind}: ${i.text}`).join("; "),
         },
       );
+      if (draft.reviewerNote) auditLines.push({ actor: "ai", action: "Asked the reviewer", detail: draft.reviewerNote });
       if (routed.lane !== d.routed.lane) auditLines.push({ actor: "code", action: `Moved to ${laneName(routed.lane)}`, detail: routed.reason });
     }
 
